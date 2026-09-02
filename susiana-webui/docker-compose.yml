@@ -1,0 +1,13 @@
+services:
+  webui:
+    build:
+      context: .
+      dockerfile: dockerfile
+    image: pc-armin/susiana:webui
+    container_name: susiana-webui
+    restart: "no"
+    ports:
+      - "5178:80"
+    environment:
+      API_HOST: susiana-api
+      API_PORT: "8080"

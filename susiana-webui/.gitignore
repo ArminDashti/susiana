@@ -1,0 +1,11 @@
+.env
+.armin/
+node_modules/
+dist/
+*.log
+dev-dist/
+*.exe
+
+# github-commit-push-all: large files (>5MB) auto-ignored
+
+# Auto-managed large files (>5MB)

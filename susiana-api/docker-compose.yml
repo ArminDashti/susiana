@@ -1,0 +1,52 @@
+name: susiana
+
+services:
+  susiana-pgsql:
+    image: postgres:16-alpine
+    container_name: susiana-pgsql
+    environment:
+      POSTGRES_USER: susiana
+      POSTGRES_PASSWORD: susiana
+      POSTGRES_DB: susiana
+    volumes:
+      - susiana-pgdata:/var/lib/postgresql/data
+    expose:
+      - "5432"
+    networks:
+      - app_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U susiana -d susiana"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: "no"
+
+  susiana-api:
+    image: ${IMAGE_TAG:-susiana-api:latest}
+    container_name: susiana-api
+    expose:
+      - "${INTERNAL_PORT:-8080}"
+    ports:
+      - target: ${INTERNAL_PORT:-8080}
+        published: ${PUBLISH_PORT-8200}
+        protocol: tcp
+    environment:
+      HTTP_PORT: ${INTERNAL_PORT:-8080}
+      DATABASE_URL: postgres://susiana:susiana@susiana-pgsql:5432/susiana?sslmode=disable
+      MARKET_PROVIDER: ${MARKET_PROVIDER:-stub}
+      GIN_MODE: ${GIN_MODE:-release}
+    networks:
+      - app_net
+    depends_on:
+      susiana-pgsql:
+        condition: service_healthy
+    restart: "no"
+
+networks:
+  app_net:
+    name: ${DOCKER_NETWORK:-susiana-net}
+    external: true
+
+volumes:
+  susiana-pgdata:
+    name: susiana-pgdata
